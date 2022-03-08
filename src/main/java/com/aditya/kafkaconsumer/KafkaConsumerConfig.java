@@ -8,7 +8,6 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -37,15 +36,14 @@ public class KafkaConsumerConfig {
 
     @Bean
     public ConsumerFactory<String,User> userConsumerFactory(){
-        JsonDeserializer<User> deserializer = new JsonDeserializer<>(User.class);
-        deserializer.addTrustedPackages("*");
 
         Map<String,Object> configs = new HashMap<>();
         configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
         configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,deserializer);
+        configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,JsonDeserializer.class);
         configs.put(ConsumerConfig.GROUP_ID_CONFIG,"mygroup-2");
-        return new DefaultKafkaConsumerFactory<>(configs,new StringDeserializer(),deserializer);
+        configs.put(JsonDeserializer.TRUSTED_PACKAGES,"com.aditya.kafkaproducer");
+        return new DefaultKafkaConsumerFactory<>(configs,new StringDeserializer(),new JsonDeserializer<>(User.class,false));
     }
 
     @Bean
